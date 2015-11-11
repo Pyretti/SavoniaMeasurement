@@ -7,26 +7,125 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class ChartActivity extends AppCompatActivity {
-    //private final String BASE_RESULTS_URL = "http://codez.savonia.fi/etp4301_2015_r3/mobiilienergia/public_html/";
+    private final String BASE_RESULTS_URL = "http://codez.savonia.fi/etp4301_2015_r3/mobiilienergia/public_html/";
 
-    private class RetrieveMeasurementsTask extends AsyncTask<URL, Void, String>
+    //private Chart chartView;
+
+    private class RetrieveMeasurementsTask extends AsyncTask<Sensor, Void, ArrayList<MeasurementData>>
     {
         ProgressBar spinner;
 
         @Override
-        protected String doInBackground(URL... params)
+        protected ArrayList<MeasurementData> doInBackground(Sensor... params)
         {
             Log.v("CHART", "doInBackground()");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+            //muodostetaan url ensin String muodossa
+            String urlString = BASE_RESULTS_URL + "?key=" + params[0].getSourceKey() +
+                    "&data-tags=";
+            for (int i = 0; i < params.length; i++)
+            {
+                urlString += params[i].getTag();
+                //erotellaan sensorien tagit pilkuilla.
+                if(i < params.length)
+                {
+                    urlString += ",";
+                }
             }
 
-            return null;
+            // Muodostetaan URL ja luetaan tulokset
+            URL url = null;
+            try {
+                //Muodostetaan lopullinen URL
+                url = new URL(urlString);
+                Log.v("CHART_URL", url.toString());
+
+            } catch (MalformedURLException e) {
+                // Osoite ei ole validi, ei voida lukea tuloksia, lopetetaan lukeminen
+                e.printStackTrace();
+                return null;
+            }
+
+            String content = "";
+            try {
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(url.openStream())
+                );
+                String inputLine;
+                // luetaan tulokset rivi kerrallaan Stringiin.
+                while((inputLine = bufferedReader.readLine()) != null)
+                {
+                    content += inputLine;
+                }
+            }
+            catch (Exception e)
+            {
+                // Virhe lukiessa tuloksia, lopetetaan lukeminen
+                e.printStackTrace();
+                return null;
+            }
+
+            //tulostetaan saadut tulokset konsoliin.
+            Log.v("RESULT STRING", content);
+
+            // parsitaan JSON
+            //ArrayList<String> timestamps = new ArrayList<>(); // labels
+            //ArrayList<DataSet> dataSets = new ArrayList<>();
+            ArrayList<MeasurementData> measurementDatas = new ArrayList<>();
+
+            try{
+                JSONArray jsonArray = new JSONArray(content);
+                // käydän jokainen timestamp läpi
+                for (int i = 0; i < jsonArray.length(); i++)
+                {
+                    MeasurementData measurementData = new MeasurementData();
+
+                    // TODO: muokkaa timestamp käyttäjäystävällisempään muotoon.
+                    JSONObject innerJSONObject = jsonArray.getJSONObject(i);
+                    //timestamps.add(innerJSONObject.getString("TimestampISO8601"));
+                    measurementData.setTimeStamp(innerJSONObject.getString("TimestampISO8601"));
+                    Log.v("TIMESTAMP ADDDED", measurementData.getTimeStamp());
+
+                    // loopataan timestampin mittaustulokset
+                    JSONArray valueJSONArray = innerJSONObject.getJSONArray("Values");
+                    for (int j = 0; j < valueJSONArray.length(); j++)
+                    {
+                        measurementData.getValues().add(Float.valueOf(valueJSONArray.getJSONObject(j).getString("Value")));
+                        Log.v("Value", String.valueOf(measurementData.getValues().get(j)));
+                    }
+                    measurementDatas.add(measurementData);
+                }
+            }catch (Exception e) {
+                // virhe tulosten parsimisessa. lopetetaan.
+                e.printStackTrace();
+                return null;
+            }
+
+            for (int i = 0; i < measurementDatas.size(); i++)
+            {
+                Log.v("DATAS TIMESTAMP", measurementDatas.get(i).getTimeStamp());
+                for (int j = 0; j < measurementDatas.get(i).getValues().size(); j++)
+                {
+                    Log.v("DATAS VALUE", String.valueOf(measurementDatas.get(i).getValues().get(j)));
+                }
+            }
+
+            return measurementDatas;
         }
 
         @Override
@@ -37,9 +136,41 @@ public class ChartActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(ArrayList<MeasurementData> measurementDatas) {
+
+            // Rakennetaan datasetit ja piirretään kuvaaja.
             Log.v("CHART", "onPostExecute()");
             spinner.setVisibility(View.GONE);
+
+            // Piirretään kuvaaja
+            BarChart resultsChart = (BarChart)findViewById(R.id.resultsChart);
+
+            ArrayList<String> labels = new ArrayList<>();
+            ArrayList<BarDataSet> barDataSets = new ArrayList<>();
+
+            // loop to get x-axis labels (timestamps)
+            for (int i = 0; i < measurementDatas.size(); i++)
+            {
+                labels.add(measurementDatas.get(i).getTimeStamp());
+            }
+
+            // loop datasets
+            for (int dataSetIndex = 0; dataSetIndex < measurementDatas.get(0).getValues().size(); dataSetIndex++)
+            {
+                ArrayList<BarEntry> barEntries = new ArrayList<>();
+                for (int labelIndex = 0; labelIndex < measurementDatas.size(); labelIndex++)
+                {
+                    float value = measurementDatas.get(labelIndex).getValues().get(dataSetIndex);
+                    BarEntry barEntry = new BarEntry(value, labelIndex);
+                    barEntries.add(barEntry);
+                }
+                BarDataSet barDataSet = new BarDataSet(barEntries, "SomeLabel");
+            }
+
+            BarData barData = new BarData(labels, barDataSets);
+            resultsChart.setData(barData);
+            //resultsChart.notifyDataSetChanged();
+            resultsChart.invalidate();
         }
     }
 
@@ -47,6 +178,10 @@ public class ChartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
+
+        //BarChart resultsChart = (BarChart)findViewById(R.id.resultsChart);
+
+
         // Poimitaan Intentin extra parametri (valittu sensori)
         Sensor sensorFromIntent =
                 (Sensor)getIntent().getSerializableExtra(SensorsActivity.EXTRA_SENSOR_KEY);
@@ -54,10 +189,12 @@ public class ChartActivity extends AppCompatActivity {
         Log.v("ChartSensor NAME", sensorFromIntent.getName());
         Log.v("ChartSensor TAG", sensorFromIntent.getTag());
 
-        //TODO: Tulosten hakeminen
-        //URL resultsURL =
+
+        //Tulosten hakeminen / kuvaajan päivittäminen
+
         RetrieveMeasurementsTask retrieveMeasurementsTask =
-                (RetrieveMeasurementsTask) new RetrieveMeasurementsTask().execute();
+                (RetrieveMeasurementsTask) new RetrieveMeasurementsTask().execute(sensorFromIntent);
+
 
         //TODO: Kuvaajan piirtäminen
 

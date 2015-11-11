@@ -32,22 +32,28 @@ public class SensorsActivity extends AppCompatActivity {
 
     private ArrayAdapter<Sensor> sensorsArrayAdapter;
 
-    private class RetrieveSensorsTask extends AsyncTask<URL, Void, ArrayList<Sensor>>
+    private class RetrieveSensorsTask extends AsyncTask<MeasurementSource, Void, ArrayList<Sensor>>
     {
         ProgressBar spinner;
 
         @Override
-        protected ArrayList<Sensor> doInBackground(URL... params) {
+        protected ArrayList<Sensor> doInBackground(MeasurementSource... params) {
+            MeasurementSource ms = params[0];
             ArrayList<Sensor> resultSensorsArray = new ArrayList<>();
+            URL sensorsURL = null;
+            try {
+                sensorsURL = new URL(BASE_URL + "?key=" + ms.getKey());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
 
             String content = "";
             try {
                 BufferedReader bufferedReader = new BufferedReader(
-                        new InputStreamReader(params[0].openStream())
+                        new InputStreamReader(sensorsURL.openStream())
                 );
 
                 String inputLine;
-
 
                 while((inputLine = bufferedReader.readLine()) != null)
                 {
@@ -71,6 +77,7 @@ public class SensorsActivity extends AppCompatActivity {
                             innerJSONObject.getString("name"),
                             innerJSONObject.getString("tag")
                             );
+                    sensorToAdd.setSourceKey(ms.getKey());
                     resultSensorsArray.add(sensorToAdd);
                     Log.v("resultSensorsArray", "Size = " + resultSensorsArray.size());
                 }
@@ -123,7 +130,7 @@ public class SensorsActivity extends AppCompatActivity {
 
 
         // asetetaan aluksi listviewiin tyhjä lista
-        ArrayList<Sensor> sensors = new ArrayList<Sensor>();
+        ArrayList<Sensor> sensors = new ArrayList<>();
         sensorsArrayAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
@@ -134,10 +141,9 @@ public class SensorsActivity extends AppCompatActivity {
         // suoritetaan sensorien haku, jossa näytetään latausanimaatio
         URL sensorsURL = null;
         try {
-            sensorsURL = new URL(BASE_URL + "?key=" + mSource.getKey());
             Log.v("ASYNC", "aloitetaan");
             // Load sensors
-            new RetrieveSensorsTask().execute(sensorsURL);
+            new RetrieveSensorsTask().execute(mSource);
         } catch (Exception e) {
             // ERROR loading sensors
             e.printStackTrace();

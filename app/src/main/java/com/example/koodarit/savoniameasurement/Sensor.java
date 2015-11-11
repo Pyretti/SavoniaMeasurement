@@ -2,12 +2,10 @@ package com.example.koodarit.savoniameasurement;
 
 import java.io.Serializable;
 
-/**
- * Created by Pyry on 21.10.2015.
- */
 public class Sensor implements Serializable {
     private String name;
     private String tag;
+    private String sourceKey;
 
     public Sensor()
     {
@@ -30,11 +28,10 @@ public class Sensor implements Serializable {
     {
         this.tag = tag;
     }
-    public String getName()
-    {
-        return this.name;
-    }
+    public void setSourceKey(String sourceKey){this.sourceKey = sourceKey;}
+    public String getName() {return this.name;}
     public String getTag(){return this.tag; }
+    public String getSourceKey(){return this.sourceKey;}
 
     @Override
     public String toString() {

@@ -7,7 +7,7 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.example.koodarit.savoniameasurement.ChartActivity">
 
-    <com.github.mikephil.charting.charts.LineChart
+    <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/resultsChart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
