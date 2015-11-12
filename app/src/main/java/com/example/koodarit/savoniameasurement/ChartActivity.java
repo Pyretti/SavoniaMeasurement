@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -147,6 +148,7 @@ public class ChartActivity extends AppCompatActivity {
 
             ArrayList<String> labels = new ArrayList<>();
             ArrayList<BarDataSet> barDataSets = new ArrayList<>();
+            ArrayList<BarEntry> barEntries = new ArrayList<>();
 
             // loop to get x-axis labels (timestamps)
             for (int i = 0; i < measurementDatas.size(); i++)
@@ -157,20 +159,27 @@ public class ChartActivity extends AppCompatActivity {
             // loop datasets
             for (int dataSetIndex = 0; dataSetIndex < measurementDatas.get(0).getValues().size(); dataSetIndex++)
             {
-                ArrayList<BarEntry> barEntries = new ArrayList<>();
                 for (int labelIndex = 0; labelIndex < measurementDatas.size(); labelIndex++)
                 {
                     float value = measurementDatas.get(labelIndex).getValues().get(dataSetIndex);
                     BarEntry barEntry = new BarEntry(value, labelIndex);
                     barEntries.add(barEntry);
                 }
-                BarDataSet barDataSet = new BarDataSet(barEntries, "SomeLabel");
             }
+
+            BarDataSet barDataSet = new BarDataSet(barEntries, "SomeLabel");
+
+            barDataSets.add(barDataSet);
 
             BarData barData = new BarData(labels, barDataSets);
             resultsChart.setData(barData);
+            resultsChart.setDescription(" ");
+            resultsChart.animateXY(0, 1000);
             //resultsChart.notifyDataSetChanged();
             resultsChart.invalidate();
+
+            XAxis xAxis = resultsChart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         }
     }
 
