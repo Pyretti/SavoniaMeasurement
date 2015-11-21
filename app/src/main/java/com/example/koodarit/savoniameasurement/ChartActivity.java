@@ -20,7 +20,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ChartActivity extends AppCompatActivity {
     private final String BASE_RESULTS_URL = "http://codez.savonia.fi/etp4301_2015_r3/mobiilienergia/public_html/";
@@ -99,7 +102,31 @@ public class ChartActivity extends AppCompatActivity {
                     // TODO: muokkaa timestamp käyttäjäystävällisempään muotoon.
                     JSONObject innerJSONObject = jsonArray.getJSONObject(i);
                     //timestamps.add(innerJSONObject.getString("TimestampISO8601"));
-                    measurementData.setTimeStamp(innerJSONObject.getString("TimestampISO8601"));
+
+                    String timestamp = innerJSONObject.getString("TimestampISO8601");
+                    String tmpTimestamp = timestamp.replace("T"," ").replace("+02:00", ""); // Siivotaan turhat tiedot pois
+                    tmpTimestamp = tmpTimestamp.substring(0, tmpTimestamp.length()-8); // Poistetaan kahdeksan viimeistä merkkiä.
+                    Log.v("Original timastamp", timestamp);
+                    Log.v("Temp timastamp", tmpTimestamp);
+
+                    String inputPattern = "yyyy-MM-dd HH:mm:ss";
+                    String outputPattern = "dd.MM.yyyy HH:mm";
+                    SimpleDateFormat inputFormat = new SimpleDateFormat(inputPattern);
+                    SimpleDateFormat outputFormat = new SimpleDateFormat(outputPattern);
+
+                    String newTimestamp = null;
+
+                    try {
+                        Date date = inputFormat.parse(tmpTimestamp);
+
+                        Log.v("Date to string", date.toString());
+
+                        newTimestamp = outputFormat.format(date);
+                    } catch (ParseException e) {
+                        Log.v("Timestamp parsing error", e.getMessage());
+                    }
+
+                    measurementData.setTimeStamp(newTimestamp);
                     Log.v("TIMESTAMP ADDDED", measurementData.getTimeStamp());
 
                     // loopataan timestampin mittaustulokset
