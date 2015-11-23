@@ -28,7 +28,7 @@ import java.util.Date;
 public class ChartActivity extends AppCompatActivity {
     private final String BASE_RESULTS_URL = "http://codez.savonia.fi/etp4301_2015_r3/mobiilienergia/public_html/";
 
-    //private Chart chartView;
+    private Sensor sensorFromIntent;
 
     private class RetrieveMeasurementsTask extends AsyncTask<Sensor, Void, ArrayList<MeasurementData>>
     {
@@ -194,7 +194,7 @@ public class ChartActivity extends AppCompatActivity {
                 }
             }
 
-            BarDataSet barDataSet = new BarDataSet(barEntries, "SomeLabel");
+            BarDataSet barDataSet = new BarDataSet(barEntries, sensorFromIntent.getName());
 
             barDataSets.add(barDataSet);
 
@@ -215,11 +215,9 @@ public class ChartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
 
-        //BarChart resultsChart = (BarChart)findViewById(R.id.resultsChart);
-
 
         // Poimitaan Intentin extra parametri (valittu sensori)
-        Sensor sensorFromIntent =
+        sensorFromIntent =
                 (Sensor)getIntent().getSerializableExtra(SensorsActivity.EXTRA_SENSOR_KEY);
 
         Log.v("ChartSensor NAME", sensorFromIntent.getName());
