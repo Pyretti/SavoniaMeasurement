@@ -17,15 +17,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.v("DEBUG", "!!! STARTED !!!");
+        //Log.v("DEBUG", "!!! STARTED !!!");
 
         setContentView(R.layout.activity_main);
 
         final ListView mSourceListView = (ListView)findViewById(R.id.measurementSourceListView);
 
+        // Mittatietokannan hakuavaimet
         MeasurementSource[] mSources = new MeasurementSource[]{
                 new MeasurementSource("SK101-kuopioenergy", "Kuopion Energia", "Kuopion energian dataa."),
-                new MeasurementSource("SK1-tekuenergy", "Savonian lämpötolpat", "Savonian lämpötolppien dataa")
+                new MeasurementSource("SK1-tekuenergy", "Savonian lämpötolpat", "Savonian lämpötolppien dataa"),
+                new MeasurementSource("SK106-ruokala32r", "Savonia ruokala", "Savonian ruokalan dataa."),
+                new MeasurementSource("SK108-vesilab312r", "Savonia vesimittaus", "Savonian vesimittausdataa")
         };
 
         ArrayAdapter<MeasurementSource> mSourceAdapter = new ArrayAdapter<MeasurementSource>(this, android.R.layout.simple_list_item_1, mSources);

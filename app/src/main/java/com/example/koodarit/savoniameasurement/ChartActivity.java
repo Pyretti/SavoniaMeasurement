@@ -37,7 +37,7 @@ public class ChartActivity extends AppCompatActivity {
         @Override
         protected ArrayList<MeasurementData> doInBackground(Sensor... params)
         {
-            Log.v("CHART", "doInBackground()");
+            //Log.v("CHART", "doInBackground()");
 
             //muodostetaan url ensin String muodossa
             String urlString = BASE_RESULTS_URL + "?key=" + params[0].getSourceKey() +
@@ -85,7 +85,7 @@ public class ChartActivity extends AppCompatActivity {
             }
 
             //tulostetaan saadut tulokset konsoliin.
-            Log.v("RESULT STRING", content);
+            //Log.v("RESULT STRING", content);
 
             // parsitaan JSON
             //ArrayList<String> timestamps = new ArrayList<>(); // labels
@@ -119,22 +119,22 @@ public class ChartActivity extends AppCompatActivity {
                     try {
                         Date date = inputFormat.parse(tmpTimestamp);
 
-                        Log.v("Date to string", date.toString());
+                        //Log.v("Date to string", date.toString());
 
                         newTimestamp = outputFormat.format(date);
                     } catch (ParseException e) {
-                        Log.v("Timestamp parsing error", e.getMessage());
+                        //Log.v("Timestamp parsing error", e.getMessage());
                     }
 
                     measurementData.setTimeStamp(newTimestamp);
-                    Log.v("TIMESTAMP ADDDED", measurementData.getTimeStamp());
+                    //Log.v("TIMESTAMP ADDDED", measurementData.getTimeStamp());
 
                     // loopataan timestampin mittaustulokset
                     JSONArray valueJSONArray = innerJSONObject.getJSONArray("Values");
                     for (int j = 0; j < valueJSONArray.length(); j++)
                     {
                         measurementData.getValues().add(Float.valueOf(valueJSONArray.getJSONObject(j).getString("Value")));
-                        Log.v("Value", String.valueOf(measurementData.getValues().get(j)));
+                        //Log.v("Value", String.valueOf(measurementData.getValues().get(j)));
                     }
                     measurementDatas.add(measurementData);
                 }
@@ -146,10 +146,10 @@ public class ChartActivity extends AppCompatActivity {
 
             for (int i = 0; i < measurementDatas.size(); i++)
             {
-                Log.v("DATAS TIMESTAMP", measurementDatas.get(i).getTimeStamp());
+                //Log.v("DATAS TIMESTAMP", measurementDatas.get(i).getTimeStamp());
                 for (int j = 0; j < measurementDatas.get(i).getValues().size(); j++)
                 {
-                    Log.v("DATAS VALUE", String.valueOf(measurementDatas.get(i).getValues().get(j)));
+                    //Log.v("DATAS VALUE", String.valueOf(measurementDatas.get(i).getValues().get(j)));
                 }
             }
 
@@ -158,7 +158,7 @@ public class ChartActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            Log.v("CHART", "onPreExecute()");
+            //Log.v("CHART", "onPreExecute()");
             spinner = (ProgressBar)findViewById(R.id.resultsProgressBar);
             spinner.setVisibility(View.VISIBLE);
         }
@@ -167,7 +167,7 @@ public class ChartActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList<MeasurementData> measurementDatas) {
 
             // Rakennetaan datasetit ja piirretään kuvaaja.
-            Log.v("CHART", "onPostExecute()");
+            //Log.v("CHART", "onPostExecute()");
             spinner.setVisibility(View.GONE);
 
             // Piirretään kuvaaja
@@ -220,17 +220,14 @@ public class ChartActivity extends AppCompatActivity {
         sensorFromIntent =
                 (Sensor)getIntent().getSerializableExtra(SensorsActivity.EXTRA_SENSOR_KEY);
 
+        /*
         Log.v("ChartSensor NAME", sensorFromIntent.getName());
         Log.v("ChartSensor TAG", sensorFromIntent.getTag());
-
+        */
 
         //Tulosten hakeminen / kuvaajan päivittäminen
 
         RetrieveMeasurementsTask retrieveMeasurementsTask =
                 (RetrieveMeasurementsTask) new RetrieveMeasurementsTask().execute(sensorFromIntent);
-
-
-        //TODO: Kuvaajan piirtäminen
-
     }
 }

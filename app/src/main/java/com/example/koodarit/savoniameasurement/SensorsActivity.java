@@ -122,40 +122,56 @@ public class SensorsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sensors);
 
         MeasurementSource mSource = (MeasurementSource) getIntent().getSerializableExtra(MainActivity.EXTRA_SENSOR_KEY);
+
+
+        if (mSource.getKey().equals("SK101-kuopioenergy"))
+        {
+            Intent intent = new Intent(this, ChartActivity.class);
+            Sensor dummySensor = new Sensor();
+            dummySensor.setName("Kuopion energia");
+            dummySensor.setSourceKey("SK101-kuopioenergy");
+            dummySensor.setTag("DummyTag");
+
+            OpenChartActivity(dummySensor);
+        }
+        else
+        {
+            /*
         Log.v("mSource name", mSource.getName());
         Log.v("mSource description", mSource.getDescription());
         Log.v("mSource key", mSource.getKey());
+        */
+            final ListView sensorsListView = (ListView)findViewById(R.id.sensorsListView);
 
-        final ListView sensorsListView = (ListView)findViewById(R.id.sensorsListView);
 
+            // asetetaan aluksi listviewiin tyhjä lista
+            ArrayList<Sensor> sensors = new ArrayList<>();
+            sensorsArrayAdapter = new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_list_item_1,
+                    sensors
+            );
+            sensorsListView.setAdapter(sensorsArrayAdapter);
 
-        // asetetaan aluksi listviewiin tyhjä lista
-        ArrayList<Sensor> sensors = new ArrayList<>();
-        sensorsArrayAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_list_item_1,
-                sensors
-        );
-        sensorsListView.setAdapter(sensorsArrayAdapter);
-
-        // suoritetaan sensorien haku, jossa näytetään latausanimaatio
-        URL sensorsURL = null;
-        try {
-            Log.v("ASYNC", "aloitetaan");
-            // Load sensors
-            new RetrieveSensorsTask().execute(mSource);
-        } catch (Exception e) {
-            // ERROR loading sensors
-            e.printStackTrace();
-        }
-
-        sensorsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Sensor selectedSensor = (Sensor)sensorsListView.getAdapter().getItem(position);
-                OpenChartActivity(selectedSensor);
+            // suoritetaan sensorien haku, jossa näytetään latausanimaatio
+            URL sensorsURL = null;
+            try {
+                Log.v("ASYNC", "aloitetaan");
+                // Load sensors
+                new RetrieveSensorsTask().execute(mSource);
+            } catch (Exception e) {
+                // ERROR loading sensors
+                e.printStackTrace();
             }
-        });
+
+            sensorsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Sensor selectedSensor = (Sensor)sensorsListView.getAdapter().getItem(position);
+                    OpenChartActivity(selectedSensor);
+                }
+            });
+        }
     }
 
     private void OpenChartActivity(Sensor selectedSensor)
