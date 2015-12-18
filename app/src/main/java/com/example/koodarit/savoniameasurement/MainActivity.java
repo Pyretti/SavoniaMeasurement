@@ -3,7 +3,6 @@ package com.example.koodarit.savoniameasurement;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -11,7 +10,7 @@ import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
     // Key for serializing Sensors for Intent's extra.
-    public final static String EXTRA_SENSOR_KEY = "SavoniaMeasurement.MainActivity_SourceKey";
+    public final static String EXTRA_MSOURCE_KEY = "SavoniaMeasurement.MainActivity_SourceKey";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Lähetetään Mittauslähde SensorsActivity -ikkunalle extra-parametrinä
         // (measurementSource-olio lähtetetään serialisoituna)
-        sensorIntent.putExtra(this.EXTRA_SENSOR_KEY, measurementSource);
+        sensorIntent.putExtra(this.EXTRA_MSOURCE_KEY, measurementSource);
         startActivity(sensorIntent);
     }
 }

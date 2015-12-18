@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ChartActivity extends AppCompatActivity {
-    private final String BASE_RESULTS_URL = "http://codez.savonia.fi/etp4301_2015_r3/mobiilienergia/public_html/";
+    public static final String BASE_RESULTS_URL = "http://codez.savonia.fi/etp4301_2015_r3/mobiilienergia/public_html/";
 
     private Sensor sensorFromIntent;
 
@@ -133,7 +133,15 @@ public class ChartActivity extends AppCompatActivity {
                     JSONArray valueJSONArray = innerJSONObject.getJSONArray("Values");
                     for (int j = 0; j < valueJSONArray.length(); j++)
                     {
-                        measurementData.getValues().add(Float.valueOf(valueJSONArray.getJSONObject(j).getString("Value")));
+                        // kerrotaan kuopion energian arvot 500:lla
+                        if (sensorFromIntent.getSourceKey() == "SK101-kuopioenergy")
+                        {
+                            measurementData.getValues().add((Float.valueOf(valueJSONArray.getJSONObject(j).getString("Value")) * 500.0f));
+                        }
+                        else
+                        {
+                            measurementData.getValues().add(Float.valueOf(valueJSONArray.getJSONObject(j).getString("Value")));
+                        }
                         //Log.v("Value", String.valueOf(measurementData.getValues().get(j)));
                     }
                     measurementDatas.add(measurementData);

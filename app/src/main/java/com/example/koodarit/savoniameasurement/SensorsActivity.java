@@ -1,30 +1,26 @@
 package com.example.koodarit.savoniameasurement;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.media.tv.TvContract;
 import android.os.AsyncTask;
+import android.support.v4.app.NotificationCompatSideChannelService;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class SensorsActivity extends AppCompatActivity {
     // Key for serializing Sensors for Intent's extra.
@@ -121,7 +117,7 @@ public class SensorsActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_sensors);
 
-        MeasurementSource mSource = (MeasurementSource) getIntent().getSerializableExtra(MainActivity.EXTRA_SENSOR_KEY);
+        final MeasurementSource mSource = (MeasurementSource) getIntent().getSerializableExtra(MainActivity.EXTRA_MSOURCE_KEY);
 
 
         if (mSource.getKey().equals("SK101-kuopioenergy"))
@@ -142,6 +138,7 @@ public class SensorsActivity extends AppCompatActivity {
         Log.v("mSource key", mSource.getKey());
         */
             final ListView sensorsListView = (ListView)findViewById(R.id.sensorsListView);
+            final Button latestResultsButton = (Button)findViewById((R.id.latestResultsButton));
 
 
             // asetetaan aluksi listviewiin tyhjä lista
@@ -168,7 +165,21 @@ public class SensorsActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Sensor selectedSensor = (Sensor)sensorsListView.getAdapter().getItem(position);
-                    OpenChartActivity(selectedSensor);
+                    if (mSource.getKey().equals("SK108-vesilab312r"))
+                    {
+                        OpenLineChartActivity(selectedSensor);
+                    }
+                    else
+                    {
+                        OpenChartActivity(selectedSensor);
+                    }
+                }
+            });
+
+            latestResultsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openLatestResultsActivity(mSource);
                 }
             });
         }
@@ -178,6 +189,20 @@ public class SensorsActivity extends AppCompatActivity {
     {
         Intent intent = new Intent(this, ChartActivity.class);
         intent.putExtra(this.EXTRA_SENSOR_KEY, selectedSensor);
+        startActivity(intent);
+    }
+
+    private void OpenLineChartActivity(Sensor selectedSensor)
+    {
+        Intent intent = new Intent(this, LineChartActivity.class);
+        intent.putExtra(this.EXTRA_SENSOR_KEY, selectedSensor);
+        startActivity(intent);
+    }
+
+    private void openLatestResultsActivity(MeasurementSource mSource)
+    {
+        Intent intent = new Intent(this, LatestMeasurementsActivity.class);
+        intent.putExtra(MainActivity.EXTRA_MSOURCE_KEY, mSource);
         startActivity(intent);
     }
 }
